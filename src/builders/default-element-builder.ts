@@ -1,18 +1,21 @@
 import { ElementBuilder } from '../models/element-builder';
 import { WhenElementBuilder } from '../models/when-element-builder';
 import { ElementConfig } from '../models/element-config';
-import { TargetElement } from '../models/target-element';
 import { RawTransformer } from '../models/raw-transformer';
+
+type DefaultElementBuilderOptions = {
+    tag?: keyof HTMLElementTagNameMap;
+    element?: HTMLElement;
+    config?: ElementConfig;
+}
 
 export class DefaultElementBuilder implements ElementBuilder {
     private readonly config: ElementConfig;
 
     private predicate?: () => boolean;
 
-    constructor(target: TargetElement) {
-        this.config = {
-            target,
-        };
+    private constructor(options: DefaultElementBuilderOptions) {
+        this.config = this.getConfigFromOptions(options);
     }
 
     public when(predicate: () => boolean): WhenElementBuilder {
@@ -94,5 +97,33 @@ export class DefaultElementBuilder implements ElementBuilder {
         this.predicate = undefined;
 
         return this;
+    }
+
+    private getConfigFromOptions({ config: elementConfig, element: htmlElement, tag }: DefaultElementBuilderOptions): ElementConfig {
+        if (elementConfig) {
+            return elementConfig;
+        }
+
+        if (htmlElement) {
+            return { target: htmlElement };
+        }
+
+        if (tag) {
+            return { target: tag };
+        }
+
+        throw new Error('None of options is defined');
+    }
+
+    public static forTag(tag: keyof HTMLElementTagNameMap): DefaultElementBuilder {
+        return new DefaultElementBuilder({ tag });
+    }
+
+    public static forElement(element: HTMLElement): DefaultElementBuilder {
+        return new DefaultElementBuilder({ element });
+    }
+
+    public static forConfig(config: ElementConfig): DefaultElementBuilder {
+        return new DefaultElementBuilder({ config });
     }
 }
