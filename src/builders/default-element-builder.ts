@@ -30,13 +30,14 @@ export class DefaultElementBuilder implements ElementBuilder {
         });
     }
 
+    public withChild(children: HTMLElement[]): ElementBuilder;
     public withChild(children: HTMLCollection): ElementBuilder;
     public withChild(child: HTMLElement, ...rest: HTMLElement[]): ElementBuilder;
-    public withChild(singleOrCollection: HTMLElement | HTMLCollection, ...rest: HTMLElement[]): ElementBuilder {
+    public withChild(singleOrCollection: HTMLElement | HTMLElement[] | HTMLCollection, ...rest: HTMLElement[]): ElementBuilder {
         return this.applyWithPredicate((config) => {
             config.children ??= [];
 
-            if (singleOrCollection instanceof HTMLCollection) {
+            if (singleOrCollection instanceof HTMLCollection || Array.isArray(singleOrCollection)) {
                 config.children.push(...singleOrCollection);
             } else {
                 config.children.push(singleOrCollection, ...rest);

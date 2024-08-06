@@ -7,6 +7,7 @@ export type ElementBuilder = {
     withClass(className: string, ...rest: string[]): ElementBuilder;
 
     withChild(child: HTMLElement, ...rest: HTMLElement[]): ElementBuilder;
+    withChild(children: HTMLElement[]): ElementBuilder;
     withChild(children: HTMLCollection): ElementBuilder;
 
     withText(text: string): ElementBuilder;
