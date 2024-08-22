@@ -1,5 +1,4 @@
 import { ElementBuilder } from '../models/element-builder';
-import { WhenElementBuilder } from '../models/when-element-builder';
 import { ElementConfig } from '../models/element-config';
 import { RawTransformer } from '../models/raw-transformer';
 
@@ -12,57 +11,61 @@ type DefaultElementBuilderOptions = {
 export class DefaultElementBuilder implements ElementBuilder {
     private readonly config: ElementConfig;
 
-    private predicate?: () => boolean;
-
     private constructor(options: DefaultElementBuilderOptions) {
         this.config = this.getConfigFromOptions(options);
     }
 
-    public when(predicate: () => boolean): WhenElementBuilder {
-        this.predicate = predicate;
-        return this;
+    public match(
+        predicate: () => boolean,
+        success: (builder: ElementBuilder) => ElementBuilder,
+        fail?: (builder: ElementBuilder) => ElementBuilder,
+    ): ElementBuilder {
+        if (predicate()) {
+            return success(this);
+        } else {
+            return fail?.(this) ?? this;
+        }
     }
 
     public withClass(className: string, ...rest: string[]): ElementBuilder {
-        return this.applyWithPredicate((config) => {
-            config.classNames ??= [];
-            config.classNames.push(className, ...rest);
-        });
+        this.config.classNames ??= [];
+        this.config.classNames.push(className, ...rest);
+
+        return this;
     }
 
     public withChild(children: HTMLElement[]): ElementBuilder;
     public withChild(children: HTMLCollection): ElementBuilder;
     public withChild(child: HTMLElement, ...rest: HTMLElement[]): ElementBuilder;
     public withChild(singleOrCollection: HTMLElement | HTMLElement[] | HTMLCollection, ...rest: HTMLElement[]): ElementBuilder {
-        return this.applyWithPredicate((config) => {
-            config.children ??= [];
+        this.config.children ??= [];
+        if (singleOrCollection instanceof HTMLCollection || Array.isArray(singleOrCollection)) {
+            this.config.children.push(...singleOrCollection);
+        } else {
+            this.config.children.push(singleOrCollection, ...rest);
+        }
 
-            if (singleOrCollection instanceof HTMLCollection || Array.isArray(singleOrCollection)) {
-                config.children.push(...singleOrCollection);
-            } else {
-                config.children.push(singleOrCollection, ...rest);
-            }
-        });
+        return this;
     }
 
     public withText(text: string): ElementBuilder {
-        return this.applyWithPredicate((config) => {
-            config.innerText = text;
-        });
+        this.config.innerText = text;
+
+        return this;
     }
 
     public withListener<EventName extends keyof HTMLElementEventMap>(eventName: EventName, handler: (event: HTMLElementEventMap[EventName]) => void): ElementBuilder {
-        return this.applyWithPredicate((config) => {
-            config.listeners ??= [];
-            config.listeners.push([eventName, handler]);
-        });
+        this.config.listeners ??= [];
+        this.config.listeners.push([eventName, handler]);
+
+        return this;
     }
 
     public withRawTransformation(transformer: RawTransformer): ElementBuilder {
-        return this.applyWithPredicate((config) => {
-            config.rawTransformers ??= [];
-            config.rawTransformers.push(transformer);
-        });
+        this.config.rawTransformers ??= [];
+        this.config.rawTransformers.push(transformer);
+
+        return this;
     }
 
     public build(): HTMLElement {
@@ -88,16 +91,6 @@ export class DefaultElementBuilder implements ElementBuilder {
         this.config.rawTransformers?.forEach((transformer) => transformer(element));
 
         return element;
-    }
-
-    private applyWithPredicate(successFn: (config: ElementConfig) => void): this {
-        if (this.predicate?.() !== false) {
-            successFn(this.config);
-        }
-
-        this.predicate = undefined;
-
-        return this;
     }
 
     private getConfigFromOptions({ config: elementConfig, element: htmlElement, tag }: DefaultElementBuilderOptions): ElementConfig {

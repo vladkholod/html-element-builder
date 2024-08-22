@@ -1,8 +1,11 @@
 import { RawTransformer } from './raw-transformer';
-import { WhenElementBuilder } from './when-element-builder';
 
 export type ElementBuilder = {
-    when(predicate: () => boolean): WhenElementBuilder;
+    match(
+        predicate: () => boolean,
+        successFn: (builder: ElementBuilder) => ElementBuilder,
+        failFn?: (builder: ElementBuilder) => ElementBuilder,
+    ): ElementBuilder;
 
     withClass(className: string, ...rest: string[]): ElementBuilder;
 
