@@ -1,12 +1,15 @@
 import { ElementBuilder } from './models/element-builder';
 import { TargetElement } from './models/target-element';
-import { DefaultElementBuilder } from './builders/default-element-builder';
+import { ConfigElementBuilder } from './builders/config-element-builder';
+import { ChainElementBuilder } from './builders/chain-element-builder';
 
-function elementBuilder(tagOrElement: TargetElement): ElementBuilder {
-    return DefaultElementBuilder.forConfig({ target: tagOrElement });
+function eb(target: TargetElement): ElementBuilder {
+    return new ChainElementBuilder(target);
 }
 
 export {
-    DefaultElementBuilder as ElementBuilder,
-    elementBuilder as eb,
+    ConfigElementBuilder,
+    ChainElementBuilder,
+
+    eb,
 };

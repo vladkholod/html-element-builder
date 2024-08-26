@@ -2,16 +2,16 @@ import { ElementBuilder } from '../models/element-builder';
 import { ElementConfig } from '../models/element-config';
 import { RawTransformer } from '../models/raw-transformer';
 
-type DefaultElementBuilderOptions = {
+type ConfigElementBuilderOptions = {
     tag?: keyof HTMLElementTagNameMap;
     element?: HTMLElement;
     config?: ElementConfig;
 }
 
-export class DefaultElementBuilder implements ElementBuilder {
+export class ConfigElementBuilder implements ElementBuilder {
     private readonly config: ElementConfig;
 
-    private constructor(options: DefaultElementBuilderOptions) {
+    private constructor(options: ConfigElementBuilderOptions) {
         this.config = this.getConfigFromOptions(options);
     }
 
@@ -93,7 +93,7 @@ export class DefaultElementBuilder implements ElementBuilder {
         return element;
     }
 
-    private getConfigFromOptions({ config: elementConfig, element: htmlElement, tag }: DefaultElementBuilderOptions): ElementConfig {
+    private getConfigFromOptions({ config: elementConfig, element: htmlElement, tag }: ConfigElementBuilderOptions): ElementConfig {
         if (elementConfig) {
             return elementConfig;
         }
@@ -109,15 +109,15 @@ export class DefaultElementBuilder implements ElementBuilder {
         throw new Error('None of options is defined');
     }
 
-    public static forTag(tag: keyof HTMLElementTagNameMap): DefaultElementBuilder {
-        return new DefaultElementBuilder({ tag });
+    public static forTag(tag: keyof HTMLElementTagNameMap): ConfigElementBuilder {
+        return new ConfigElementBuilder({ tag });
     }
 
-    public static forElement(element: HTMLElement): DefaultElementBuilder {
-        return new DefaultElementBuilder({ element });
+    public static forElement(element: HTMLElement): ConfigElementBuilder {
+        return new ConfigElementBuilder({ element });
     }
 
-    public static forConfig(config: ElementConfig): DefaultElementBuilder {
-        return new DefaultElementBuilder({ config });
+    public static forConfig(config: ElementConfig): ConfigElementBuilder {
+        return new ConfigElementBuilder({ config });
     }
 }
