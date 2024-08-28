@@ -1,6 +1,6 @@
 {
   "name": "@bqx/html-element-builder",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "HTML element builder",
   "main": "dist/index.js",
   "module": "dist/index.js",

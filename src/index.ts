@@ -8,6 +8,7 @@ function eb(target: TargetElement): ElementBuilder {
 }
 
 export {
+    ElementBuilder,
     ConfigElementBuilder,
     ChainElementBuilder,
 
