@@ -1,1 +1,1 @@
-export type RawTransformer = (element: HTMLElement) => void;
+export type RawTransformer<T extends HTMLElement> = (element: T) => void;

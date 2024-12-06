@@ -1,17 +1,16 @@
 import { ElementBuilder } from '../models/element-builder';
 import { RawTransformer } from '../models/raw-transformer';
-import { TargetElement } from '../models/target-element';
 
-export class ChainElementBuilder implements ElementBuilder {
-    private readonly transformers: RawTransformer[] = [];
+export class ChainElementBuilder<T extends HTMLElement> implements ElementBuilder<T> {
+    private readonly transformers: RawTransformer<T>[] = [];
 
-    public constructor(private readonly target: TargetElement) { }
+    public constructor(private readonly target: keyof HTMLElementTagNameMap | HTMLElement) { }
 
     public match(
         predicate: () => boolean,
-        success: (builder: ElementBuilder) => ElementBuilder,
-        fail?: (builder: ElementBuilder) => ElementBuilder,
-    ): ElementBuilder {
+        success: (builder: ElementBuilder<T>) => ElementBuilder<T>,
+        fail?: (builder: ElementBuilder<T>) => ElementBuilder<T>,
+    ): ElementBuilder<T> {
         if (predicate()) {
             return success(this);
         } else {
@@ -19,16 +18,16 @@ export class ChainElementBuilder implements ElementBuilder {
         }
     }
 
-    public withClass(className: string, ...rest: string[]): ElementBuilder {
+    public withClass(className: string, ...rest: string[]): ElementBuilder<T> {
         this.transformers.push((element) => element.classList.add(className, ...rest));
 
         return this;
     }
 
-    public withChild(children: HTMLElement[]): ElementBuilder;
-    public withChild(children: HTMLCollection): ElementBuilder;
-    public withChild(child: HTMLElement, ...rest: HTMLElement[]): ElementBuilder;
-    public withChild(singleOrCollection: HTMLElement | HTMLElement[] | HTMLCollection, ...rest: HTMLElement[]): ElementBuilder {
+    public withChild(children: HTMLElement[]): ElementBuilder<T>;
+    public withChild(children: HTMLCollection): ElementBuilder<T>;
+    public withChild(child: HTMLElement, ...rest: HTMLElement[]): ElementBuilder<T>;
+    public withChild(singleOrCollection: HTMLElement | HTMLElement[] | HTMLCollection, ...rest: HTMLElement[]): ElementBuilder<T> {
         let appendChildren: HTMLElement[];
         if (singleOrCollection instanceof HTMLCollection || Array.isArray(singleOrCollection)) {
             appendChildren = [...singleOrCollection] as HTMLElement[];
@@ -41,28 +40,28 @@ export class ChainElementBuilder implements ElementBuilder {
         return this;
     }
 
-    public withText(text: string): ElementBuilder {
+    public withText(text: string): ElementBuilder<T> {
         this.transformers.push((element) => element.innerText = text);
 
         return this;
     }
 
-    public withListener<EventName extends keyof HTMLElementEventMap>(eventName: EventName, handler: (event: HTMLElementEventMap[EventName]) => void): ElementBuilder {
+    public withListener<EventName extends keyof HTMLElementEventMap>(eventName: EventName, handler: (event: HTMLElementEventMap[EventName]) => void): ElementBuilder<T> {
         this.transformers.push((element) => element.addEventListener(eventName, handler));
 
         return this;
     }
 
-    public withRawTransformation(transformer: RawTransformer): ElementBuilder {
+    public withRawTransformation(transformer: RawTransformer<T>): ElementBuilder<T> {
         this.transformers.push(transformer);
 
         return this;
     }
 
-    public build(): HTMLElement {
-        const element: HTMLElement = typeof this.target === 'string'
+    public build(): T {
+        const element: T = (typeof this.target === 'string'
             ? document.createElement(this.target)
-            : this.target;
+            : this.target) as T;
 
         for (const transformer of this.transformers) {
             transformer(element);

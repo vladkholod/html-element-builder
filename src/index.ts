@@ -1,16 +1,10 @@
 import { ElementBuilder } from './models/element-builder';
-import { TargetElement } from './models/target-element';
-import { ConfigElementBuilder } from './builders/config-element-builder';
 import { ChainElementBuilder } from './builders/chain-element-builder';
-
-function eb(target: TargetElement): ElementBuilder {
-    return new ChainElementBuilder(target);
-}
+import { createChainElementBuilder } from './utils/create-chain-element-builder';
 
 export {
     ElementBuilder,
-    ConfigElementBuilder,
     ChainElementBuilder,
 
-    eb,
+    createChainElementBuilder as eb,
 };
