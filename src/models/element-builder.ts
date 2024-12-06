@@ -22,5 +22,5 @@ export type ElementBuilder<T extends HTMLElement> = {
 
     withRawTransformation(transformer: RawTransformer<T>): ElementBuilder<T>;
 
-    build(): HTMLElement;
+    build(): T;
 };
